@@ -15,24 +15,20 @@ function MessageContent({ content, isStreaming }) {
         <p className="leading-relaxed">
             {segments.map((seg, i) => {
                 if (seg.type === 'big') return (
-                    <span key={i} className="block text-white text-lg font-normal mb-2 leading-snug">
+                    <span key={i} style={{ display: 'block', fontSize: '1.25rem', fontWeight: 900, color: 'white', marginBottom: '10px', lineHeight: 1.3, letterSpacing: '-0.02em' }}>
                         {seg.content}
                     </span>
                 )
                 if (seg.type === 'key') return (
-                    <span key={i} className="text-[#fb923c] font-medium">
-                        {seg.content}
-                    </span>
+                    <span key={i} className="text-[#fb923c] font-medium">{seg.content}</span>
                 )
                 if (seg.type === 'soft') return (
-                    <span key={i} className="block text-white/45 text-xs italic mt-2 leading-relaxed">
+                    <span key={i} style={{ display: 'block', fontSize: '0.75rem', fontStyle: 'italic', color: 'rgba(255,255,255,0.4)', marginTop: '10px', lineHeight: 1.6 }}>
                         {seg.content}
                     </span>
                 )
                 return (
-                    <span key={i} className="text-white/85 text-sm font-light">
-                        {seg.content}
-                    </span>
+                    <span key={i} className="text-white/85 text-sm font-light">{seg.content}</span>
                 )
             })}
             {isStreaming && (
@@ -47,16 +43,13 @@ export default function ChatWindow({ messages, isStreaming, suggestions, onSugge
     const containerRef = useRef(null)
     const [userScrolledUp, setUserScrolledUp] = useState(false)
 
-    // Détecter si l'utilisateur a scrollé manuellement vers le haut
     function handleScroll() {
         const el = containerRef.current
         if (!el) return
         const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight
-        // Si plus de 80px du bas → l'utilisateur a scrollé
         setUserScrolledUp(distanceFromBottom > 80)
     }
 
-    // Auto-scroll seulement si l'utilisateur est en bas
     useEffect(() => {
         if (!userScrolledUp) {
             bottomRef.current?.scrollIntoView({ behavior: 'smooth' })

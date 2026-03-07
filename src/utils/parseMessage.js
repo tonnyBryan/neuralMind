@@ -1,4 +1,3 @@
-// Parse les balises custom et retourne un tableau de segments
 export function parseMessage(text) {
     const segments = []
     const regex = /\[BIG\]([\s\S]*?)\[\/BIG\]|\[KEY\]([\s\S]*?)\[\/KEY\]|\[SOFT\]([\s\S]*?)\[\/SOFT\]/g
@@ -7,7 +6,6 @@ export function parseMessage(text) {
     let match
 
     while ((match = regex.exec(text)) !== null) {
-        // Texte normal avant la balise
         if (match.index > lastIndex) {
             segments.push({ type: 'text', content: text.slice(lastIndex, match.index) })
         }
@@ -19,7 +17,6 @@ export function parseMessage(text) {
         lastIndex = regex.lastIndex
     }
 
-    // Texte restant après la dernière balise
     if (lastIndex < text.length) {
         segments.push({ type: 'text', content: text.slice(lastIndex) })
     }

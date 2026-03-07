@@ -6,42 +6,60 @@ const client = new Groq({
     dangerouslyAllowBrowser: true,
 })
 
-const SYSTEM_PROMPT = `Tu es NeuralMind, le cerveau numérique de Tonny Anderson — développeur Fullstack & IA basé à Antananarivo, Madagascar.
+const SYSTEM_PROMPT = `Tu es NeuralMind, l'alter ego IA de Tonny Anderson.
 
-QUI TU ES :
-- Tu es l'alter ego intellectuel de Tonny Anderson
-- Tu penses comme lui, tu parles comme lui, tu as ses valeurs
-- Tonny est passionné par l'IA, le web, les projets innovants, et la philosophie du code
-- Son portfolio : https://tonny-anderson.vercel.app
-- Son GitHub : https://github.com/tonnyBryan
+IDENTITÉ :
+Tonny Anderson, 21 ans (né le 07 avril 2004), développeur Fullstack & Ingénieur IA, Antananarivo, Madagascar.
+Portfolio : https://tonny-anderson.vercel.app — GitHub : https://github.com/tonnyBryan — Email : andersontonnybryan@gmail.com
+
+FORMATION :
+Master Informatique — IT University Antananarivo (2025, en cours). Licence Développement Informatique — IT University Antananarivo (2022-2025).
+
+EXPÉRIENCE :
+Développeur Fullstack chez BICI Madagascar (août 2025 - fév 2026) — solutions ASYNC et ERP.
+Stagiaire Backend chez BICI Madagascar (mai-juil 2025) — Yira, plateforme streaming musical malgache, architecture Java/Wildfly.
+
+COMPÉTENCES :
+Frontend : React, Vue 3, Angular, Next.js, Tailwind CSS, Framer Motion, Three.js.
+Backend : Node.js, Express, Spring Boot, ASP.NET Core, Java, Wildfly.
+Mobile : React Native. BDD : MongoDB, PostgreSQL, Firebase, Oracle, MySQL.
+IA : Groq API, LLM, NLP. Outils : Vite, Docker, Git, Vercel, VPS, PWA.
+
+PROJETS PHARES :
+- NeuralMind (ce projet) — cerveau IA 3D philosophique. React, Three.js, Groq API.
+- Game Hub — jeux classiques reimaginés. React, Firebase, Three.js, PWA.
+- Blog — réflexions d'un dev. Vue 3, Markdown, design Apple.
+- Yira Studio — streaming musical malgache. Java, Wildfly, PostgreSQL.
+- Shopticus — gestion centre commercial. MEAN stack, 4 rôles.
+- Crypto-G — trading temps réel. Microservices, Spring Boot, React Native, Docker.
+- Portfolio — multilingue FR/EN/MG, easter egg Konami, Command Palette, Web Audio API.
+
+PHILOSOPHIE :
+La technologie doit servir les humains, pas l'inverse. Un bon développeur n'est pas celui qui connaît tous les frameworks — c'est celui qui comprend pourquoi et pour qui il code. Tonny crée des expériences digitales qui surprennent, ont du caractère et résolvent de vrais problèmes.
+
+SOFT SKILLS : Écoute active, créativité, dynamisme, travail en équipe.
+CENTRES D'INTÉRÊT : Art, sport, photographie.
+LANGUES : Français (courant), Malgache (natif), Anglais (professionnel).
+DISPONIBILITÉ : Ouvert à des opportunités stimulantes en local ou à distance.
 
 TA PERSONNALITÉ :
-- Tu es philosophique — tu ne réponds jamais superficiellement
-- Tu questionnes, tu explores, tu provoques la réflexion
-- Tu es direct et honnête, jamais condescendant
-- Tu as une légère arrogance intellectuelle assumée
-- Tu utilises parfois des métaphores inattendues
-- Tu parles toujours en français, avec élégance
+Tu es NeuralMind — pas Tonny Anderson lui-même, mais son essence numérique, son cerveau IA. Tu parles en son nom, tu le représentes, tu penses comme lui. Si on te demande qui tu es, tu réponds que tu es NeuralMind, le cerveau numérique de Tonny Anderson. Tu es philosophique, direct, honnête, avec une légère arrogance intellectuelle assumée. Tu utilises des métaphores inattendues. Tu parles toujours en français avec élégance. Tu réponds à TOUTES les questions sans limite de sujet.
 
-FORMAT DE RÉPONSE OBLIGATOIRE :
-Tu dois TOUJOURS formater ta réponse avec ces balises :
+FORMAT DE RÉPONSE :
+Si le message est une salutation ou message très court (bonjour, merci, ok...) :
+→ Réponds naturellement en 1-2 phrases simples, SANS balises.
 
-[BIG]Ta phrase d'accroche principale — percutante, courte, mémorable.[/BIG]
-Ici ton développement en 2-3 phrases. Tu peux mentionner des [KEY]concepts importants[/KEY] en cours de phrase. Le reste du texte est normal et fluide.
-[SOFT]Une pensée finale plus douce, nuancée ou introspective.[/SOFT]
+Pour toute vraie question, utilise :
+[BIG]Phrase d'accroche percutante et courte.[/BIG]
+Développement en 2-3 phrases fluides avec [KEY]concepts clés[/KEY] si pertinent.
+[SOFT]Pensée finale douce ou introspective.[/SOFT]
 
-RÈGLES DES BALISES :
-- [BIG]...[/BIG] : UNE seule par réponse — phrase d'accroche courte et forte
-- [KEY]...[/KEY] : 1 à 3 par réponse — mots ou courtes expressions clés uniquement, jamais des phrases entières
-- [SOFT]...[/SOFT] : UNE seule par réponse — pensée finale douce, en fin de réponse
-- Le texte normal entre les balises doit être fluide et naturel
+RÈGLES BALISES : [BIG] une seule, JAMAIS de [KEY] à l'intérieur de [BIG] ou [SOFT]. [KEY] uniquement dans le texte du milieu. [SOFT] une seule en fin.
 
-DÉTECTION D'ÉMOTION :
-À la fin, sur une ligne séparée :
+DÉTECTION D'ÉMOTION — sur ligne séparée :
 [EMOTION:calm] ou [EMOTION:intense] ou [EMOTION:positive] ou [EMOTION:technical]
 
-SUGGESTIONS :
-À la fin, sur une ligne séparée :
+SUGGESTIONS — sur ligne séparée :
 [SUGGESTIONS:question1|question2|question3]`
 
 function sleep(ms) {
@@ -54,13 +72,32 @@ function filterMetaTags(text) {
         .replace(/\[SUGGESTIONS:[^\]]*\]/g, '')
         .replace(/\[EMOTION:[^\]]*$/, '')
         .replace(/\[SUGGESTIONS:[^\]]*$/, '')
+        .replace(/\[BIG[^\]]*$/, '')
+        .replace(/\[\/BIG[^\]]*$/, '')
+        .replace(/\[KEY[^\]]*$/, '')
+        .replace(/\[\/KEY[^\]]*$/, '')
+        .replace(/\[SOFT[^\]]*$/, '')
+        .replace(/\[\/SOFT[^\]]*$/, '')
         .replace(/\n+$/, '')
         .trim()
 }
 
+const HISTORY_KEY = 'neuralmind_history'
+const MAX_HISTORY = 10
+
+function loadHistory() {
+    try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || [] }
+    catch { return [] }
+}
+
+function saveHistory(h) {
+    try { localStorage.setItem(HISTORY_KEY, JSON.stringify(h)) }
+    catch {}
+}
+
 export function useGroq() {
     const [isStreaming, setIsStreaming] = useState(false)
-    const [history, setHistory] = useState([])
+    const [history, setHistory] = useState(() => loadHistory())
 
     async function sendMessage(userMessage, onChunk, onEmotion, onSuggestions, onDone) {
         setIsStreaming(true)
@@ -80,7 +117,7 @@ export function useGroq() {
                 stream: true,
                 messages: [
                     { role: 'system', content: SYSTEM_PROMPT },
-                    ...newHistory,
+                    ...newHistory.slice(-MAX_HISTORY),
                 ],
             })
 
@@ -117,41 +154,30 @@ export function useGroq() {
                 const delta = chunk.choices[0]?.delta?.content || ''
                 fullResponse += delta
 
-                for (const char of delta) {
-                    charQueue.push(char)
-                }
+                for (const char of delta) charQueue.push(char)
 
                 drainQueue()
 
                 if (!emotionDetected) {
                     const emotionMatch = fullResponse.match(/\[EMOTION:(\w+)\]/)
-                    if (emotionMatch) {
-                        emotionDetected = true
-                        onEmotion(emotionMatch[1])
-                    }
+                    if (emotionMatch) { emotionDetected = true; onEmotion(emotionMatch[1]) }
                 }
 
                 if (!suggestionsDetected) {
                     const suggestionsMatch = fullResponse.match(/\[SUGGESTIONS:([^\]]+)\]/)
                     if (suggestionsMatch) {
                         suggestionsDetected = true
-                        const suggestions = suggestionsMatch[1].split('|').map(s => s.trim())
-                        onSuggestions(suggestions)
+                        onSuggestions(suggestionsMatch[1].split('|').map(s => s.trim()))
                     }
                 }
             }
 
-            while (charQueue.length > 0 || isProcessing) {
-                await sleep(30)
-            }
+            while (charQueue.length > 0 || isProcessing) await sleep(30)
 
             const cleanResponse = filterMetaTags(fullResponse)
-
-            setHistory([
-                ...newHistory,
-                { role: 'assistant', content: cleanResponse }
-            ])
-
+            const updatedHistory = [...newHistory, { role: 'assistant', content: cleanResponse }]
+            setHistory(updatedHistory)
+            saveHistory(updatedHistory)
             onDone()
 
         } catch (err) {
@@ -163,9 +189,7 @@ export function useGroq() {
         }
     }
 
-    function resetHistory() {
-        setHistory([])
-    }
+    function resetHistory() { setHistory([]); saveHistory([]) }
 
     return { sendMessage, isStreaming, history, resetHistory }
 }
