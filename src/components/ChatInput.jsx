@@ -24,7 +24,7 @@ export default function ChatInput({ onSend, disabled = false, showExamples = tru
     return (
         <div className="w-full flex flex-col gap-3">
 
-            {/* Exemples — visibles uniquement avant le premier message */}
+            {/* Exemples */}
             {showExamples && (
                 <div className="flex flex-wrap gap-2">
                     {EXAMPLES.map((example, i) => (
@@ -54,7 +54,7 @@ export default function ChatInput({ onSend, disabled = false, showExamples = tru
                 <button
                     onClick={handleSend}
                     disabled={disabled || !value.trim()}
-                    className="text-white/40 hover:text-[#fb923c] disabled:opacity-20 transition-colors duration-200 text-lg cursor-pointer bg-transparent border-none"
+                    className="text-[#fb923c] hover:text-[#fb923c]/70 disabled:opacity-20 transition-colors duration-200 text-lg cursor-pointer bg-transparent border-none"
                 >
                     →
                 </button>

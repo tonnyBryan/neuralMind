@@ -51,28 +51,23 @@ export default function Brain({ isThinking = false, emotion = 'calm' }) {
     function triggerActivation() {
         const { neuronMeshes, synapseLines, neurons } = sceneRef.current
         if (!neuronMeshes) return
-
         clearActivationTimers()
-
         const color = EMOTION_COLORS[emotionRef.current] || EMOTION_COLORS.calm
 
-        // Trier de gauche à droite
         const sorted = neuronMeshes
             .map((mesh, i) => ({ mesh, x: neurons[i].position[0] }))
             .sort((a, b) => a.x - b.x)
 
-        // Activation lente — 80ms entre chaque neurone
         sorted.forEach(({ mesh }, i) => {
             const t = setTimeout(() => {
                 if (!isThinkingRef.current) return
                 mesh.material.color.set(color)
                 mesh.userData.activated = true
                 mesh.userData.activePulsePhase = Math.random() * Math.PI * 2
-            }, i * 80) // 80ms = lent et visible
+            }, i * 80)
             activationTimersRef.current.push(t)
         })
 
-        // Synapses aussi lentement
         synapseLines?.forEach((line, i) => {
             const t = setTimeout(() => {
                 if (!isThinkingRef.current) return
@@ -87,10 +82,8 @@ export default function Brain({ isThinking = false, emotion = 'calm' }) {
     function resetNeurons() {
         const { neuronMeshes, synapseLines, neurons } = sceneRef.current
         if (!neuronMeshes) return
-
         clearActivationTimers()
 
-        // Reset lent aussi
         neuronMeshes.forEach((mesh, i) => {
             const t = setTimeout(() => {
                 mesh.material.color.set('#ffffff')
