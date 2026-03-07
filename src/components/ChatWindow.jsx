@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { parseMessage } from '../utils/parseMessage.js'
 
 const EMOTION_COLORS = {
@@ -44,10 +44,24 @@ function MessageContent({ content, isStreaming }) {
 
 export default function ChatWindow({ messages, isStreaming, suggestions, onSuggestion }) {
     const bottomRef = useRef(null)
+    const containerRef = useRef(null)
+    const [userScrolledUp, setUserScrolledUp] = useState(false)
 
+    // Détecter si l'utilisateur a scrollé manuellement vers le haut
+    function handleScroll() {
+        const el = containerRef.current
+        if (!el) return
+        const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight
+        // Si plus de 80px du bas → l'utilisateur a scrollé
+        setUserScrolledUp(distanceFromBottom > 80)
+    }
+
+    // Auto-scroll seulement si l'utilisateur est en bas
     useEffect(() => {
-        bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-    }, [messages])
+        if (!userScrolledUp) {
+            bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+        }
+    }, [messages, userScrolledUp])
 
     if (messages.length === 0) {
         return (
@@ -62,6 +76,8 @@ export default function ChatWindow({ messages, isStreaming, suggestions, onSugge
 
     return (
         <div
+            ref={containerRef}
+            onScroll={handleScroll}
             className="flex-1 overflow-y-auto flex flex-col gap-8 py-4 pr-1"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
@@ -73,13 +89,10 @@ export default function ChatWindow({ messages, isStreaming, suggestions, onSugge
 
                 return (
                     <div key={i} className="flex flex-col gap-1">
-
-                        {/* Label */}
                         <p className="text-white/40 text-xs tracking-widest uppercase mb-2">
                             {msg.role === 'user' ? 'Vous' : 'NeuralMind'}
                         </p>
 
-                        {/* Message */}
                         {msg.role === 'user' ? (
                             <p className="text-white/60 text-sm font-light leading-relaxed">
                                 {msg.content}
@@ -88,7 +101,6 @@ export default function ChatWindow({ messages, isStreaming, suggestions, onSugge
                             <MessageContent content={msg.content} isStreaming={isStreamed} />
                         )}
 
-                        {/* Badge émotion */}
                         {msg.role === 'assistant' && msg.emotion && (
                             <p className={`text-xs mt-2 font-medium ${EMOTION_COLORS[msg.emotion] || 'text-white/50'}`}>
                                 ◆ {msg.emotion}
@@ -98,7 +110,6 @@ export default function ChatWindow({ messages, isStreaming, suggestions, onSugge
                 )
             })}
 
-            {/* Suggestions */}
             {!isStreaming && suggestions.length > 0 && (
                 <div className="flex flex-col gap-2">
                     <p className="text-white/40 text-xs tracking-widest uppercase">Continuer</p>
