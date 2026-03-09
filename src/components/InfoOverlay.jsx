@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-export default function InfoOverlay() {
+export default function InfoOverlay({ inline = false }) {
     const [open, setOpen] = useState(false)
     const [visible, setVisible] = useState(false)
 
@@ -20,14 +20,25 @@ export default function InfoOverlay() {
         return () => window.removeEventListener('keydown', handler)
     }, [])
 
+    const trigger = inline ? (
+        // Bouton intégré dans le header — style cohérent avec le reset
+        <button
+            onClick={openModal}
+            title="À propos de NeuralMind"
+            className="flex items-center gap-1.5 text-white/25 hover:text-white/60 text-xs transition-colors duration-200 bg-transparent border-none cursor-pointer"
+        >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            info
+        </button>
+    ) : null // Le bouton fixed est supprimé — tout passe par inline=true maintenant
+
     return (
         <>
-            <button
-                onClick={openModal}
-                className="fixed top-8 right-8 z-50 text-white/30 hover:text-white/70 transition-colors duration-200 bg-transparent border-none cursor-pointer text-lg"
-            >
-                ℹ
-            </button>
+            {trigger}
 
             {open && (
                 <div
