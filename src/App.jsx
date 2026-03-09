@@ -69,26 +69,34 @@ function App() {
 
             <InfoOverlay />
 
-            {/* LEFT — Chat — plein écran mobile, 45% desktop */}
+            {/* LEFT — Chat */}
             <div className="w-full md:w-[45%] flex flex-col px-6 md:px-12 py-8 md:py-10 z-10 overflow-hidden flex-shrink-0">
 
                 {/* Header */}
-                <div className="mb-6 md:mb-8 flex-shrink-0 flex items-start justify-between">
+                <div className="mb-6 md:mb-8 flex-shrink-0 flex items-center justify-between">
                     <div>
                         <h1 className="text-white text-2xl font-black tracking-tight mb-1">
                             Neural<span className="text-[#fb923c]">Mind</span>
                         </h1>
                         <p className="text-white/30 text-xs tracking-widest uppercase">Cerveau numérique de Tonny Anderson</p>
                     </div>
-                    {messages.length > 0 && (
-                        <button
-                            onClick={handleReset}
-                            className="text-white/20 hover:text-white/50 text-xs transition-colors duration-200 mt-1"
-                            title="Nouvelle conversation"
-                        >
-                            ↺ reset
-                        </button>
-                    )}
+                    {/* Actions — info + reset côte à côte, bien espacés */}
+                    <div className="flex items-center gap-3">
+                        <InfoOverlay inline />
+                        {messages.length > 0 && (
+                            <button
+                                onClick={handleReset}
+                                title="Nouvelle conversation"
+                                className="flex items-center gap-1.5 text-white/25 hover:text-white/60 text-xs transition-colors duration-200 bg-transparent border-none cursor-pointer"
+                            >
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                                    <path d="M3 3v5h5"/>
+                                </svg>
+                                reset
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 {/* Messages */}
