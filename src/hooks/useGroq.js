@@ -188,7 +188,11 @@ export function useGroq() {
 
         } catch (err) {
             console.error('Groq error:', err)
-            onChunk('Une erreur est survenue. Le cerveau a besoin de repos.')
+            const msg = err.message || ''
+            const isRateLimit = msg.includes('rate_limit_exceeded') || msg.includes('Rate limit')
+            onChunk(isRateLimit
+                ? 'NeuralMind est un peu fatigué là — réessaie dans quelques instants.'
+                : 'Une erreur est survenue. Le cerveau a besoin de repos.')
             onDone()
         } finally {
             setIsStreaming(false)
@@ -221,7 +225,11 @@ export function useGroq() {
 
         } catch (err) {
             console.error('Groq voice error:', err)
-            return 'Une erreur est survenue.'
+            const msg = err.message || ''
+            const isRateLimit = msg.includes('rate_limit_exceeded') || msg.includes('Rate limit')
+            return isRateLimit
+                ? 'NeuralMind est un peu fatigué là — réessaie dans quelques instants.'
+                : 'Une erreur est survenue.'
         } finally {
             setIsStreaming(false)
         }

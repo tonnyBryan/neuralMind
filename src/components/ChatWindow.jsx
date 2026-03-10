@@ -94,6 +94,7 @@ function VoiceStatusCard({ status }) {
                         <p className="text-[#fb923c] text-xs font-medium">En train de parler</p>
                         <p className="text-white/25 text-xs">Écoute NeuralMind...</p>
                     </div>
+
                 </>
             )}
         </div>
@@ -219,6 +220,25 @@ export default function ChatWindow({ messages, isStreaming, suggestions, onSugge
                                 ◆ {msg.emotion}
                             </p>
                         )}
+                        {msg.ttsRateLimit && (
+                            <div className="mt-3 flex items-center gap-3 px-4 py-3 rounded-xl"
+                                 style={{ background: 'rgba(251,146,60,0.06)', border: '1px solid rgba(251,146,60,0.15)' }}>
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(251,146,60,0.7)" strokeWidth="2" style={{ flexShrink: 0 }}>
+                                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                                    <line x1="23" y1="9" x2="17" y2="15"/>
+                                    <line x1="17" y1="9" x2="23" y2="15"/>
+                                </svg>
+                                <div>
+                                    <p style={{ color: 'rgba(251,146,60,0.85)', fontSize: '0.75rem', fontWeight: 600 }}>
+                                        Mode vocal indisponible aujourd'hui
+                                    </p>
+                                    <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.7rem', marginTop: '2px' }}>
+                                        Vous êtes basculé en mode texte
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
                     </div>
                 )
             })}

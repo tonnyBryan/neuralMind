@@ -127,7 +127,11 @@ function App() {
 
         } catch (err) {
             console.error('TTS error:', err)
-            // TTS bloqué (Brave/localhost) — afficher le texte avec badge
+            const isRateLimit = err.message?.includes('rate_limit_exceeded') || err.message?.includes('Rate limit')
+            if (isRateLimit) {
+                // Désactiver le mode vocal automatiquement
+                setVoiceMode(false)
+            }
             setMessages(prev => {
                 const updated = [...prev]
                 updated[updated.length - 1] = {
@@ -135,7 +139,7 @@ function App() {
                     content: responseText,
                     emotion: null,
                     voiceStatus: null,
-                    ttsError: true,
+                    ttsRateLimit: isRateLimit,
                 }
                 try { localStorage.setItem(MESSAGES_KEY, JSON.stringify(updated)) } catch {}
                 return updated
