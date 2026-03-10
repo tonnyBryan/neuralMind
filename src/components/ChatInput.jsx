@@ -1,11 +1,11 @@
 import { useState } from 'react'
 
 const EXAMPLES = [
-    "C'est quoi l'intelligence artificielle ?",
-    "Quelle est ta philosophie du code ?",
-    "Pourquoi devenir développeur ?",
-    "Comment apprendre à coder efficacement ?",
-    "Qu'est-ce qui te rend unique ?",
+    { label: "Qui es-tu ?",     text: "C'est qui vraiment Tonny Anderson ?" },
+    { label: "Tes projets",     text: "Parle-moi de tes projets les plus marquants." },
+    { label: "Philosophie",     text: "Quelle est ta philosophie du code ?" },
+    { label: "Code",            text: "Donne-moi un exemple de code que tu aimes écrire." },
+    { label: "IA & futur",      text: "Que penses-tu de l'avenir de l'intelligence artificielle ?" },
 ]
 
 export default function ChatInput({ onSend, disabled = false, showExamples = true }) {
@@ -30,11 +30,11 @@ export default function ChatInput({ onSend, disabled = false, showExamples = tru
                     {EXAMPLES.map((example, i) => (
                         <button
                             key={i}
-                            onClick={() => setValue(example)}
+                            onClick={() => setValue(example.text)}
                             disabled={disabled}
                             className="text-white/30 text-xs border border-white/10 rounded-full px-3 py-1.5 hover:text-white/60 hover:border-white/20 transition-all duration-200 cursor-pointer bg-transparent disabled:opacity-20"
                         >
-                            {example}
+                            {example.label}
                         </button>
                     ))}
                 </div>
