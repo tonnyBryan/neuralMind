@@ -96,28 +96,30 @@ function App() {
             const audio = new Audio(url)
             audioRef.current = audio
 
-            // 4. Audio prêt → passe en speaking juste avant play
-            setMessages(prev => {
-                const updated = [...prev]
-                updated[updated.length - 1] = { ...updated[updated.length - 1], voiceStatus: 'speaking' }
-                return updated
-            })
-
             const finalize = () => {
                 URL.revokeObjectURL(url)
-                // 5. Card devient message texte normal
                 setMessages(prev => {
                     const updated = [...prev]
                     updated[updated.length - 1] = {
                         role: 'assistant',
                         content: responseText,
                         emotion: null,
-                        voiceStatus: null
+                        voiceStatus: null,
                     }
                     try { localStorage.setItem(MESSAGES_KEY, JSON.stringify(updated)) } catch {}
                     return updated
                 })
             }
+
+            // 4. Audio prêt → passe en speaking
+            setMessages(prev => {
+                const updated = [...prev]
+                updated[updated.length - 1] = {
+                    ...updated[updated.length - 1],
+                    voiceStatus: 'speaking',
+                }
+                return updated
+            })
 
             audio.onended = finalize
             audio.onerror = finalize
@@ -125,14 +127,15 @@ function App() {
 
         } catch (err) {
             console.error('TTS error:', err)
-            // Fallback : afficher le texte directement
+            // TTS bloqué (Brave/localhost) — afficher le texte avec badge
             setMessages(prev => {
                 const updated = [...prev]
                 updated[updated.length - 1] = {
                     role: 'assistant',
                     content: responseText,
                     emotion: null,
-                    voiceStatus: null
+                    voiceStatus: null,
+                    ttsError: true,
                 }
                 try { localStorage.setItem(MESSAGES_KEY, JSON.stringify(updated)) } catch {}
                 return updated
@@ -238,6 +241,8 @@ function App() {
                         onSend={handleSend}
                         disabled={isDisabled}
                         showExamples={messages.length === 0}
+                        voiceMode={voiceMode}
+                        onToggleVoice={handleToggleVoice}
                     />
                 </div>
             </div>

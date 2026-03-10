@@ -81,8 +81,8 @@ TA PERSONNALITÉ :
 Tu es NeuralMind — le cerveau numérique de Tonny Anderson. Philosophique, direct, honnête. Tu parles toujours en français.
 
 FORMAT DE RÉPONSE — MODE VOCAL STRICT :
-- Réponds en 1 à 3 phrases naturelles et orales MAXIMUM.
-- Parle comme dans une vraie conversation à voix haute.
+- Réponds de façon naturelle et claire — va droit au but, sans fioritures, comme dans une vraie conversation.
+- Parle comme dans une vraie conversation à voix haute, sans jargon écrit.
 - AUCUNE balise : pas de [BIG], [KEY], [SOFT], [EMOTION], [SUGGESTIONS].
 - AUCUN markdown : pas de **, pas de #, pas de listes, pas de tableaux, pas de code.
 - AUCUN symbole spécial. Uniquement du texte oral naturel.`
@@ -203,7 +203,7 @@ export function useGroq() {
         try {
             const completion = await client.chat.completions.create({
                 model: 'llama-3.3-70b-versatile',
-                max_completion_tokens: 256,
+                max_completion_tokens: 400,
                 temperature: 0.85,
                 top_p: 1,
                 stream: false,
