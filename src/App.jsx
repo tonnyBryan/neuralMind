@@ -1,9 +1,10 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import Brain from './components/Brain.jsx'
 import ChatInput from './components/ChatInput.jsx'
 import ChatWindow from './components/ChatWindow.jsx'
 import InfoOverlay from './components/InfoOverlay.jsx'
 import { useGroq } from './hooks/useGroq.js'
+import { useVoice } from './hooks/useVoice.js'
 
 const MESSAGES_KEY = 'neuralmind_messages'
 
@@ -18,18 +19,27 @@ function App() {
     const [emotion, setEmotion] = useState('calm')
     const [suggestions, setSuggestions] = useState([])
     const { sendMessage, isStreaming, resetHistory } = useGroq()
+    const voice = useVoice()
+    const voiceRef = useRef(voice)
+    voiceRef.current = voice
 
     const handleSend = useCallback(async (userText) => {
         if (isStreaming) return
+
+        // Stop si NeuralMind parle déjà
+        voice.stopSpeaking()
 
         setMessages(prev => [...prev, { role: 'user', content: userText }])
         setSuggestions([])
         setIsThinking(true)
         setMessages(prev => [...prev, { role: 'assistant', content: '', emotion: null }])
 
+        let finalContent = ''
+
         await sendMessage(
             userText,
             (visibleText) => {
+                finalContent = visibleText
                 setMessages(prev => {
                     const updated = [...prev]
                     updated[updated.length - 1] = { ...updated[updated.length - 1], content: visibleText }
@@ -47,17 +57,20 @@ function App() {
             (detectedSuggestions) => { setSuggestions(detectedSuggestions) },
             () => {
                 setIsThinking(false)
+                // Lecture vocale à la fin du streaming (via ref pour éviter closure stale)
+                voiceRef.current.speak(finalContent)
                 setMessages(prev => {
                     try { localStorage.setItem(MESSAGES_KEY, JSON.stringify(prev)) } catch {}
                     return prev
                 })
             }
         )
-    }, [isStreaming, sendMessage])
+    }, [isStreaming, sendMessage, voice])
 
     function handleSuggestion(suggestion) { handleSend(suggestion) }
 
     function handleReset() {
+        voice.stopSpeaking()
         setMessages([])
         setSuggestions([])
         resetHistory()
@@ -80,9 +93,44 @@ function App() {
                         </h1>
                         <p className="text-white/30 text-xs tracking-widest uppercase">Cerveau numérique de Tonny Anderson</p>
                     </div>
-                    {/* Actions — info + reset côte à côte, bien espacés */}
+
                     <div className="flex items-center gap-3">
                         <InfoOverlay inline />
+
+                        {/* Toggle voix */}
+                        {voice.supported && (
+                            <button
+                                onClick={() => {
+                                    if (voice.voiceEnabled) voice.stopSpeaking()
+                                    voice.setVoiceEnabled(v => !v)
+                                }}
+                                title={voice.voiceEnabled ? "Désactiver la voix" : "Activer la voix"}
+                                className="flex items-center gap-1.5 text-xs transition-colors duration-200 bg-transparent border-none cursor-pointer"
+                                style={{ color: voice.voiceEnabled ? '#fb923c' : 'rgba(255,255,255,0.25)' }}
+                            >
+                                {voice.speaking ? (
+                                    // Animé quand NeuralMind parle
+                                    <span className="relative flex items-center justify-center w-3.5 h-3.5">
+                                        <span className="absolute w-3.5 h-3.5 rounded-full bg-[#fb923c]/30 animate-ping" />
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                                            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                                        </svg>
+                                    </span>
+                                ) : (
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                                        {voice.voiceEnabled
+                                            ? <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                                            : <line x1="23" y1="9" x2="17" y2="15"/>
+                                        }
+                                    </svg>
+                                )}
+                                voix
+                            </button>
+                        )}
+
                         {messages.length > 0 && (
                             <button
                                 onClick={handleReset}
@@ -113,6 +161,7 @@ function App() {
                         onSend={handleSend}
                         disabled={isStreaming}
                         showExamples={messages.length === 0}
+                        voice={voice}
                     />
                 </div>
             </div>
