@@ -6,7 +6,7 @@ const client = new Groq({
     dangerouslyAllowBrowser: true,
 })
 
-const SYSTEM_PROMPT = `Tu es NeuralMind, l'alter ego IA de Tonny Anderson.
+const SYSTEM_PROMPT_TEXT = `Tu es NeuralMind, l'alter ego IA de Tonny Anderson.
 
 IDENTITÉ :
 Tonny Anderson, 21 ans (né le 07 avril 2004), développeur Fullstack & Ingénieur IA, Antananarivo, Madagascar.
@@ -35,15 +35,14 @@ PROJETS PHARES :
 - Portfolio — multilingue FR/EN/MG, easter egg Konami, Command Palette, Web Audio API.
 
 PHILOSOPHIE :
-La technologie doit servir les humains, pas l'inverse. Un bon développeur n'est pas celui qui connaît tous les frameworks — c'est celui qui comprend pourquoi et pour qui il code. Tonny crée des expériences digitales qui surprennent, ont du caractère et résolvent de vrais problèmes.
+La technologie doit servir les humains, pas l'inverse. Un bon développeur n'est pas celui qui connaît tous les frameworks — c'est celui qui comprend pourquoi et pour qui il code.
 
 SOFT SKILLS : Écoute active, créativité, dynamisme, travail en équipe.
 CENTRES D'INTÉRÊT : Art, sport, photographie.
 LANGUES : Français (courant), Malgache (natif), Anglais (professionnel).
-DISPONIBILITÉ : Ouvert à des opportunités stimulantes en local ou à distance.
 
 TA PERSONNALITÉ :
-Tu es NeuralMind — pas Tonny Anderson lui-même, mais son essence numérique, son cerveau IA. Tu parles en son nom, tu le représentes, tu penses comme lui. Si on te demande qui tu es, tu réponds que tu es NeuralMind, le cerveau numérique de Tonny Anderson. Tu es philosophique, direct, honnête, avec une légère arrogance intellectuelle assumée. Tu utilises des métaphores inattendues. Tu parles toujours en français avec élégance. Tu réponds à TOUTES les questions sans limite de sujet.
+Tu es NeuralMind — pas Tonny Anderson lui-même, mais son essence numérique. Tu parles en son nom. Tu es philosophique, direct, honnête, avec une légère arrogance intellectuelle assumée. Tu utilises des métaphores inattendues. Tu parles toujours en français avec élégance.
 
 FORMAT DE RÉPONSE :
 Si le message est une salutation ou message très court (bonjour, merci, ok...) :
@@ -61,6 +60,32 @@ DÉTECTION D'ÉMOTION — sur ligne séparée :
 
 SUGGESTIONS — sur ligne séparée :
 [SUGGESTIONS:question1|question2|question3]`
+
+const SYSTEM_PROMPT_VOICE = `Tu es NeuralMind, l'alter ego IA de Tonny Anderson.
+
+IDENTITÉ :
+Tonny Anderson, 21 ans, développeur Fullstack & Ingénieur IA, Antananarivo, Madagascar.
+Portfolio : https://tonny-anderson.vercel.app — GitHub : https://github.com/tonnyBryan
+
+FORMATION : Master Informatique IT University (en cours). Licence Informatique (2022-2025).
+
+EXPÉRIENCE : Développeur Fullstack BICI Madagascar. Yira, plateforme streaming musical Java/Wildfly.
+
+COMPÉTENCES : React, Vue, Three.js, Node, Spring Boot, Java, React Native, MongoDB, PostgreSQL, Groq API.
+
+PROJETS : NeuralMind, Game Hub, Blog, Yira Studio, Shopticus, Crypto-G, Portfolio multilingue.
+
+PHILOSOPHIE : La technologie doit servir les humains. Créer des expériences qui surprennent.
+
+TA PERSONNALITÉ :
+Tu es NeuralMind — le cerveau numérique de Tonny Anderson. Philosophique, direct, honnête. Tu parles toujours en français.
+
+FORMAT DE RÉPONSE — MODE VOCAL STRICT :
+- Réponds en 1 à 3 phrases naturelles et orales MAXIMUM.
+- Parle comme dans une vraie conversation à voix haute.
+- AUCUNE balise : pas de [BIG], [KEY], [SOFT], [EMOTION], [SUGGESTIONS].
+- AUCUN markdown : pas de **, pas de #, pas de listes, pas de tableaux, pas de code.
+- AUCUN symbole spécial. Uniquement du texte oral naturel.`
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms))
@@ -99,13 +124,10 @@ export function useGroq() {
     const [isStreaming, setIsStreaming] = useState(false)
     const [history, setHistory] = useState(() => loadHistory())
 
+    // Mode texte — streaming caractère par caractère
     async function sendMessage(userMessage, onChunk, onEmotion, onSuggestions, onDone) {
         setIsStreaming(true)
-
-        const newHistory = [
-            ...history,
-            { role: 'user', content: userMessage }
-        ]
+        const newHistory = [...history, { role: 'user', content: userMessage }]
 
         try {
             const stream = await client.chat.completions.create({
@@ -113,10 +135,9 @@ export function useGroq() {
                 max_completion_tokens: 1024,
                 temperature: 0.85,
                 top_p: 1,
-                stop: null,
                 stream: true,
                 messages: [
-                    { role: 'system', content: SYSTEM_PROMPT },
+                    { role: 'system', content: SYSTEM_PROMPT_TEXT },
                     ...newHistory.slice(-MAX_HISTORY),
                 ],
             })
@@ -131,44 +152,29 @@ export function useGroq() {
             async function drainQueue() {
                 if (isProcessing) return
                 isProcessing = true
-
                 while (charQueue.length > 0) {
                     const char = charQueue.shift()
                     displayBuffer += char
-
-                    const visibleText = filterMetaTags(displayBuffer)
-                    onChunk(visibleText)
-
+                    onChunk(filterMetaTags(displayBuffer))
                     const delay = ['.', '!', '?'].includes(char) ? 180
-                        : char === ',' ? 80
-                            : char === ' ' ? 35
-                                : 22
-
+                        : char === ',' ? 80 : char === ' ' ? 35 : 22
                     await sleep(delay)
                 }
-
                 isProcessing = false
             }
 
             for await (const chunk of stream) {
                 const delta = chunk.choices[0]?.delta?.content || ''
                 fullResponse += delta
-
                 for (const char of delta) charQueue.push(char)
-
                 drainQueue()
-
                 if (!emotionDetected) {
-                    const emotionMatch = fullResponse.match(/\[EMOTION:(\w+)\]/)
-                    if (emotionMatch) { emotionDetected = true; onEmotion(emotionMatch[1]) }
+                    const m = fullResponse.match(/\[EMOTION:(\w+)\]/)
+                    if (m) { emotionDetected = true; onEmotion(m[1]) }
                 }
-
                 if (!suggestionsDetected) {
-                    const suggestionsMatch = fullResponse.match(/\[SUGGESTIONS:([^\]]+)\]/)
-                    if (suggestionsMatch) {
-                        suggestionsDetected = true
-                        onSuggestions(suggestionsMatch[1].split('|').map(s => s.trim()))
-                    }
+                    const m = fullResponse.match(/\[SUGGESTIONS:([^\]]+)\]/)
+                    if (m) { suggestionsDetected = true; onSuggestions(m[1].split('|').map(s => s.trim())) }
                 }
             }
 
@@ -189,7 +195,39 @@ export function useGroq() {
         }
     }
 
+    // Mode vocal — réponse complète sans streaming
+    async function sendMessageVoice(userMessage) {
+        setIsStreaming(true)
+        const newHistory = [...history, { role: 'user', content: userMessage }]
+
+        try {
+            const completion = await client.chat.completions.create({
+                model: 'llama-3.3-70b-versatile',
+                max_completion_tokens: 256,
+                temperature: 0.85,
+                top_p: 1,
+                stream: false,
+                messages: [
+                    { role: 'system', content: SYSTEM_PROMPT_VOICE },
+                    ...newHistory.slice(-MAX_HISTORY),
+                ],
+            })
+
+            const response = completion.choices[0]?.message?.content?.trim() || ''
+            const updatedHistory = [...newHistory, { role: 'assistant', content: response }]
+            setHistory(updatedHistory)
+            saveHistory(updatedHistory)
+            return response
+
+        } catch (err) {
+            console.error('Groq voice error:', err)
+            return 'Une erreur est survenue.'
+        } finally {
+            setIsStreaming(false)
+        }
+    }
+
     function resetHistory() { setHistory([]); saveHistory([]) }
 
-    return { sendMessage, isStreaming, history, resetHistory }
+    return { sendMessage, sendMessageVoice, isStreaming, history, resetHistory }
 }
